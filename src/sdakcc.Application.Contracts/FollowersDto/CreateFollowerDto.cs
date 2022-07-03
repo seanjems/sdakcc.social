@@ -4,10 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace sdakcc.PostsDto
+namespace sdakcc.FollowersDto
 {
     
-    public class CreatefolowerDto
+    public class CreateFollowerDto
 
     {
         public Guid UserId { get; set; }

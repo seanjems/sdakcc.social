@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace sdakcc.PostsDto
+namespace sdakcc.LikeseDto
 {
     
     public class CreateLikeDto

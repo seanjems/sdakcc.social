@@ -7,7 +7,7 @@ using System.Text;
 namespace sdakcc.PostsDto
 {
     
-    public class DeleteLikeDto
+    public class DeletePostsDto
     {
         public Guid Id { get; set; }
 
