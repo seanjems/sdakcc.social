@@ -9,7 +9,6 @@ namespace sdakcc.Entities
 {
     public class Posts : AuditedEntity<Guid>
     {
-
         public Guid UserId { get; set; }
         public string Description { get; set; }
         public int PostType { get; set; }
