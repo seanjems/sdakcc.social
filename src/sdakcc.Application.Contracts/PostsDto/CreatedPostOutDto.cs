@@ -7,12 +7,12 @@ using System.Text;
 namespace sdakcc.PostsDto
 {
     
-    public class UpdatePostsDto
+    public class CreatedPostOutDto
     {
-        public Guid Id { get; set; }
         public Guid UserId { get; set; }
         public string Description { get; set; }
-        public IFormFile ImageName { get; set; }
-      
+        public int PostType { get; set; }
+        public string Image { get; set; }
+
     }
 }

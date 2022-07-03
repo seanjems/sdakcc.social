@@ -11,8 +11,8 @@ namespace sdakcc.Entities
     {
         public Guid UserId { get; set; }
         public string Description { get; set; }
-        public int PostType { get; set; }
-        public string Image { get; set; }
-        public List<Like> Likes { get; set; }
+        public int? PostType { get; set; }
+        public string ImageUrl { get; set; }
+        public virtual List<Like> Likes { get; set; }
     }
 }

@@ -12,5 +12,7 @@ public class sdakccApplicationAutoMapperProfile : Profile
          * into multiple profile classes for a better organization. */
 
         CreateMap<PostsDto.CreatePostDto, Posts>();
+        CreateMap<Posts, PostsDto.CreatePostDto>();
+        CreateMap<Posts, PostsDto.CreatedPostOutDto>();
     }
 }
