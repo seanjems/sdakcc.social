@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using sdakcc.Entities;
+using sdakcc.PostsDto;
+using System.Collections.Generic;
 
 namespace sdakcc;
 
@@ -14,5 +16,7 @@ public class sdakccApplicationAutoMapperProfile : Profile
         CreateMap<PostsDto.CreatePostDto, Posts>();
         CreateMap<Posts, PostsDto.CreatePostDto>();
         CreateMap<Posts, PostsDto.CreatedPostOutDto>();
+        CreateMap<Entities.Posts, PostsListDto>();
+
     }
 }
