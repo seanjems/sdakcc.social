@@ -26,7 +26,7 @@ namespace sdakcc.Application.Posts
 
         //Create Post
 
-        public async Task<CreatedPostOutDto> CreateAsync(CreatePostDto createPostDto)
+        public async Task<CreatedPostOutDto> AddPostAsync(CreatePostDto createPostDto)
         {
             try
             {
@@ -60,7 +60,7 @@ namespace sdakcc.Application.Posts
         }
 
         //PUT Post
-        public async Task<ActionResult<CreatedPostOutDto>> UpdateAsync(UpdatePostsDto updatePostsDto)
+        public async Task<ActionResult<CreatedPostOutDto>> ChangePostAsync(UpdatePostsDto updatePostsDto)
         {
             
             var objFromDb = await _postsRepos.FirstOrDefaultAsync(x => x.Id == updatePostsDto.Id);
@@ -99,7 +99,7 @@ namespace sdakcc.Application.Posts
         }
 
         //Get by Id
-        public async Task<ActionResult<PostsListDto>> GetById(Guid Id)
+        public async Task<ActionResult<PostsListDto>> FindById(Guid Id)
         {
 
             var objFromDb = await _postsRepos.GetAsync(x => x.Id == Id);
@@ -110,7 +110,7 @@ namespace sdakcc.Application.Posts
         }
 
         //Get All
-        public async Task<GetAllPostsDto> GetAll(int page=1)
+        public async Task<GetAllPostsDto> ListAll(int page=1)
         {
             
             int numberPerPage = 10;
@@ -128,7 +128,7 @@ namespace sdakcc.Application.Posts
         }
 
         //Delete by Id
-        public async Task<ActionResult> Delete(Guid Id)
+        public async Task<ActionResult> Remove(Guid Id)
         {
             try
             {

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using sdakcc.Entities;
+using sdakcc.LikeseDto;
 using sdakcc.PostsDto;
 using System.Collections.Generic;
 
@@ -17,6 +18,7 @@ public class sdakccApplicationAutoMapperProfile : Profile
         CreateMap<Posts, PostsDto.CreatePostDto>();
         CreateMap<Posts, PostsDto.CreatedPostOutDto>();
         CreateMap<Entities.Posts, PostsListDto>();
+        CreateMap<CreateLikeDto, Entities.Like > ();
 
     }
 }
