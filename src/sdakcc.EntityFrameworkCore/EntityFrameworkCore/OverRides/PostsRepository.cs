@@ -22,19 +22,17 @@ namespace sdakcc.EntityFrameworkCore.OverRides
                                      : base(dbContextProvider)
         { }
 
-        public async Task<IQueryable<Posts>> FindLoadedPostAsync(Guid postId)
+        public async Task<Posts> FindLoadedPostAsync(Guid postId)
         {
+            
             var dbContext = await GetDbContextAsync();
             var query = dbContext.posts;
           
-          
-            query = (DbSet<Posts>)query.Where(f => f.Id==postId);
+            var output = await query
+                          .Include(x => x.Likes)
+                          .ThenInclude(x => x.Users).FirstOrDefaultAsync(x => x.Id == postId);
 
-
-
-            return query
-               .Include(x => x.Likes)
-               .ThenInclude(x => x.Users);
+            return output;
 
         }
 
@@ -46,7 +44,6 @@ namespace sdakcc.EntityFrameworkCore.OverRides
            
             var numberPerPage = 15;
             var skip = numberPerPage * (page - 1);
-
 
 
             return  query

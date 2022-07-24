@@ -1,5 +1,7 @@
 ﻿
 using Abp.Application.Services.Dto;
+using Abp.Domain.Entities;
+using Abp.UI;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -108,14 +110,17 @@ namespace sdakcc.Application.Posts
         }
 
         //Get by Id
-        public async Task<ActionResult<PostsListDto>> FindById(Guid Id)
+        public async Task<ActionResult<Entities.Posts>> FindById(Guid Id)
         {
-
-            var objFromDb = await _postsRepos.GetAsync(x => x.Id == Id);
-            if (objFromDb == null) return null;
-            return ObjectMapper.Map<Entities.Posts, PostsListDto>(objFromDb);
            
-
+            var outPut = await _postsReposCustom.FindLoadedPostAsync(Id);
+            if (outPut==null)
+            {
+                throw new UserFriendlyException("Post not found");
+               
+            }
+            return outPut;
+           
         }
         
 

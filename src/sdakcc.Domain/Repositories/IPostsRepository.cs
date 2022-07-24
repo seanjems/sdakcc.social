@@ -12,7 +12,7 @@ namespace sdakcc.Repositories
     public interface IPostsRepository : IRepository<Posts, Guid>
     {
         Task<IQueryable<Posts>> GetAllFullyLoadedPostsAsync(int page);
-        Task<IQueryable<Posts>> FindLoadedPostAsync(Guid postId);
+        Task<Posts> FindLoadedPostAsync(Guid postId);
 
     }
 
