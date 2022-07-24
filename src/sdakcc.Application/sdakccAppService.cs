@@ -1,8 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using Abp.Application.Services.Dto;
+using Microsoft.EntityFrameworkCore;
+using sdakcc.Entities;
 using sdakcc.Localization;
 using Volo.Abp.Application.Services;
+using Volo.Abp.Domain.Repositories;
 
 namespace sdakcc;
 
@@ -14,4 +20,5 @@ public abstract class sdakccAppService : ApplicationService
     {
         LocalizationResource = typeof(sdakccResource);
     }
+
 }

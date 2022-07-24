@@ -1,10 +1,14 @@
-﻿using System;
+﻿using IdentityModel;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Entities.Auditing;
+using Volo.Abp.Identity;
+using Volo.Abp.Users;
 
 namespace sdakcc.Entities
 {
@@ -15,7 +19,9 @@ namespace sdakcc.Entities
         public Guid UserId { get; set; }
 
         public DateTime CreationTime { get; set; }
-
+               
+        [ForeignKey("UserId")]
+        public virtual IdentityUser Users { get; set; }
         public Like()
         {
 

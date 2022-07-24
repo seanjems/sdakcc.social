@@ -1,12 +1,9 @@
-﻿
-using Microsoft.AspNetCore.Http;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace sdakcc.PostsDto
 {
-    
+
     public class PostsListDto
     {
         public Guid Id { get; set; }
@@ -14,7 +11,9 @@ namespace sdakcc.PostsDto
         public string Description { get; set; }
         
         public string Image { get; set; }
-        public IEnumerable<PostLikes> Likes { get; set; }
+        public List<PostLikes> PostLikes { get; set; }
+
+      
 
     }
 }

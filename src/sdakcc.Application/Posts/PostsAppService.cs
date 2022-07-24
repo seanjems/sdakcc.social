@@ -1,8 +1,11 @@
 ﻿
+using Abp.Application.Services.Dto;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using sdakcc.PostsDto;
+using sdakcc.Repositories;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,18 +14,24 @@ using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Repositories;
 
+
 namespace sdakcc.Application.Posts
 {
     public class PostsAppService: sdakccAppService
     {
         private readonly IRepository<Entities.Posts, Guid> _postsRepos;
         private readonly IWebHostEnvironment webHostEnvironment;
+        private readonly IPostsRepository _postsReposCustom;
 
-        public PostsAppService(IRepository<Entities.Posts, Guid> postsRepos, IWebHostEnvironment webHostEnvironment)
+        public PostsAppService(IRepository<Entities.Posts, Guid> postsRepos, IWebHostEnvironment webHostEnvironment,
+                                IPostsRepository postsRepository)
         {
             _postsRepos = postsRepos;
             this.webHostEnvironment = webHostEnvironment;
+            _postsReposCustom = postsRepository;
         }
+
+        
 
         //Create Post
 
@@ -108,21 +117,52 @@ namespace sdakcc.Application.Posts
            
 
         }
+        
 
         //Get All
-        public async Task<GetAllPostsDto> ListAll(int page=1)
+        public async Task<IQueryable<Entities.Posts>> ListAll(int page=1)
         {
-            
-            int numberPerPage = 10;
-            int skip = numberPerPage*(page-1);
-            var postsList = await _postsRepos.GetPagedListAsync(skip,numberPerPage,"CreationTime",includeDetails:true);
 
-            var outPut = new GetAllPostsDto()
-            {
-                Page = page,
-                Posts = ObjectMapper.Map<List<Entities.Posts>, IEnumerable<PostsListDto>>(postsList)
-            };
-            return outPut;
+            //  int numberPerPage = 10;
+            //  int skip = numberPerPage * (page - 1);
+            //  //var postsList = await _postsRepos.GetPagedListAsync(skip,numberPerPage,"CreationTime",includeDetails:true);
+
+            //  //var outPut = new GetAllPostsDto()
+            //  //{
+            //  //    Page = page,
+            //  //    Posts = ObjectMapper.Map<List<Entities.Posts>, IEnumerable<PostsListDto>>(postsList)
+            //  //};
+            //  //return outPut;
+
+            //  //Get a IQueryable<T> by including sub collections
+            // var queryable =  await _postsRepos.WithDetailsAsync(x=>x.Likes);
+
+            //  queryable = queryable.Include(x => x.Likes).ThenInclude(y => y.Users)
+            //               .OrderByDescending(x => x.CreationTime).Skip(skip).Take(numberPerPage);
+
+            //  var posts = await queryable.ToListAsync();
+            //// queryable = queryable.OrderBy(x=>x.CreationTime).Skip(skip).Take(numberPerPage);
+            ////Execute the query and get the result
+            //// var posts = await AsyncExecuter.ToListAsync(queryable);
+
+            //  // var posts = await queryable.Include(x=>x.Likes).ThenInclude(y=>y.Users).ToListAsync();
+
+            //  //var likes = ObjectMapper.Map<Entities.Posts>
+
+
+            var posts = await _postsReposCustom.GetAllFullyLoadedPostsAsync(page);
+
+            List<PostsListDto> outPutList = ObjectMapper.Map<List<Entities.Posts>, List<PostsListDto>>(posts.ToList());
+
+            return posts;
+
+           
+            //var outPut = new GetAllPostsDto()
+            //{
+            //    Page = page,
+            //    Posts = ObjectMapper.Map<List<Entities.Posts>, IEnumerable<PostsListDto>>(posts)
+            //};
+            //return outPut;
 
 
         }

@@ -5,6 +5,7 @@ using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EntityFrameworkCore;
+using Volo.Abp.EntityFrameworkCore.Modeling;
 using Volo.Abp.FeatureManagement.EntityFrameworkCore;
 using Volo.Abp.Identity;
 using Volo.Abp.Identity.EntityFrameworkCore;
@@ -55,7 +56,7 @@ public class sdakccDbContext :
 
     #region Custom SDASOCIAL entities
     //Customly defined entities
-    public DbSet<User> users { get; set; }
+    public DbSet<AppUser> users { get; set; }
     public DbSet<Posts> posts { get; set; }
     public DbSet<Like> likes { get; set; }
 
@@ -96,5 +97,26 @@ public class sdakccDbContext :
         //    b.ConfigureByConvention(); //auto configure for the base class props
         //    //...
         //});
+
+        builder.Entity<Posts>(b =>
+        {
+            b.ToTable("Posts");
+            b.ConfigureByConvention();
+
+            //Define the relation
+            b.HasMany(x => x.Likes)
+                .WithOne()
+                .HasForeignKey(x => x.PostId)
+                .IsRequired();
+        });
+
+        builder.Entity<Like>(b =>
+        {
+            b.ToTable("Like");
+            b.ConfigureByConvention();
+
+            //Define the relation
+            
+        });
     }
 }

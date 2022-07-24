@@ -14,5 +14,9 @@ namespace sdakcc.Entities
         public int? PostType { get; set; }
         public string ImageUrl { get; set; }
         public virtual List<Like> Likes { get; set; }
+        public Posts()
+        {
+            Likes = new List<Like>();
+        }
     }
 }

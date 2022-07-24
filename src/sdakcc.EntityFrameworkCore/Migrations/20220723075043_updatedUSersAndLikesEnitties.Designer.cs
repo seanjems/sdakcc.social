@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Volo.Abp.EntityFrameworkCore;
 using sdakcc.EntityFrameworkCore;
@@ -12,9 +13,10 @@ using sdakcc.EntityFrameworkCore;
 namespace sdakcc.Migrations
 {
     [DbContext(typeof(sdakccDbContext))]
-    partial class sdakccDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220723075043_updatedUSersAndLikesEnitties")]
+    partial class updatedUSersAndLikesEnitties
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -54,9 +56,14 @@ namespace sdakcc.Migrations
                     b.Property<int>("PostType")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("UsersId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("UserId", "PostId");
 
                     b.HasIndex("PostId");
+
+                    b.HasIndex("UsersId");
 
                     b.ToTable("Like", (string)null);
                 });
@@ -2064,17 +2071,23 @@ namespace sdakcc.Migrations
 
             modelBuilder.Entity("sdakcc.Entities.Like", b =>
                 {
-                    b.HasOne("sdakcc.Entities.Posts", null)
+                    b.HasOne("sdakcc.Entities.Posts", "Posts")
                         .WithMany("Likes")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Volo.Abp.Identity.IdentityUser", "Users")
+                    b.HasOne("Volo.Abp.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Volo.Abp.Identity.IdentityUser", "Users")
+                        .WithMany()
+                        .HasForeignKey("UsersId");
+
+                    b.Navigation("Posts");
 
                     b.Navigation("Users");
                 });
