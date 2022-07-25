@@ -162,6 +162,24 @@ public class IdentityServerDataSeedContributor : IDataSeedContributor, ITransien
             );
         }
 
+        // React Client
+        var reactClient = configurationSection["sdakcc_React:ClientId"];
+        if (!reactClient.IsNullOrWhiteSpace())
+        {
+            var webClientRootUrl = configurationSection["sdakcc_React:RootUrl"]?.TrimEnd('/');
+
+            await CreateClientAsync(
+                name: reactClient,
+                clientUri: webClientRootUrl,
+                scopes: commonScopes,
+                grantTypes: new[] { "client_credentials", "authorization_code" },
+                secret: (configurationSection["sdakcc_React:ClientSecret"] ?? "1q2w3e*").Sha256(),
+                requireClientSecret: false,
+                redirectUri: $"{webClientRootUrl}/authentication/login-callback/identity-server4",
+                postLogoutRedirectUri: $"{webClientRootUrl}",
+                corsOrigins: new[] { webClientRootUrl.RemovePostFix("/") }
+            );
+        }
 
 
         // Swagger Client

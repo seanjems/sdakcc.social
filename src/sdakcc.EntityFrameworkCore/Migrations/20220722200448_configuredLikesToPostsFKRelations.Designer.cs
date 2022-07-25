@@ -1600,7 +1600,7 @@ namespace sdakcc.Migrations
                     b.ToTable("IdentityServerClientClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Volo.Abp.IdentityServer.Clients.ClientCorsOrigin", b =>
+            modelBuilder.Entity("Volo.Abp.IdentityServer.Clients.ClientOrigin", b =>
                 {
                     b.Property<Guid>("ClientId")
                         .HasColumnType("uniqueidentifier");

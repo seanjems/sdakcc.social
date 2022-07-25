@@ -37,7 +37,7 @@ namespace sdakcc.Migrations
 
                     b.HasKey("UserId", "FollowerId");
 
-                    b.ToTable("followers");
+                    b.ToTable("followers", (string)null);
                 });
 
             modelBuilder.Entity("sdakcc.Entities.Like", b =>

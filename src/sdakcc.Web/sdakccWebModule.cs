@@ -77,6 +77,14 @@ public class sdakccWebModule : AbpModule
         var hostingEnvironment = context.Services.GetHostingEnvironment();
         var configuration = context.Services.GetConfiguration();
 
+
+        //quick fix
+        context.Services.AddCors(c =>
+        {
+            c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod()
+            .AllowAnyHeader());
+        });
+
         ConfigureUrls(configuration);
         ConfigureBundles();
         ConfigureAuthentication(context, configuration);
@@ -217,6 +225,7 @@ public class sdakccWebModule : AbpModule
             app.UseErrorPage();
         }
 
+        app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
         app.UseCorrelationId();
         app.UseStaticFiles();
         app.UseRouting();
