@@ -76,14 +76,16 @@ public class sdakccWebModule : AbpModule
     {
         var hostingEnvironment = context.Services.GetHostingEnvironment();
         var configuration = context.Services.GetConfiguration();
+        var _defaultCorsPolicyName = "localhost";
 
 
-        //quick fix
-        context.Services.AddCors(c =>
-        {
-            c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod()
-            .AllowAnyHeader());
-        });
+
+    ////quick fix
+    //context.Services.AddCors(c =>
+    //    {
+    //        c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod()
+    //        .AllowAnyHeader());
+    //    });
 
         ConfigureUrls(configuration);
         ConfigureBundles();
