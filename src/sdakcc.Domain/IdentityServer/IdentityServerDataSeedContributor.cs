@@ -162,6 +162,7 @@ public class IdentityServerDataSeedContributor : IDataSeedContributor, ITransien
             );
         }
 
+
         // React Client
         var reactClient = configurationSection["sdakcc_React:ClientId"];
         if (!reactClient.IsNullOrWhiteSpace())
@@ -170,16 +171,15 @@ public class IdentityServerDataSeedContributor : IDataSeedContributor, ITransien
 
             await CreateClientAsync(
                 name: reactClient,
-                //clientUri: webClientRootUrl,
+                clientUri: webClientRootUrl,
                 scopes: commonScopes,
-                grantTypes: new[] { "client_credentials", "authorization_code" },
-                secret: (configurationSection["sdakcc_React:ClientSecret"] ?? "1q2w3e*").Sha256(),
+                grantTypes: new[] { "password", "client_credentials", "authorization_code" },
+                secret: configurationSection["sdakcc_React:ClientSecret"]?.Sha256(),
                 requireClientSecret: false,
-                redirectUri: $"{webClientRootUrl}/authentication/login-callback/identity-server4",
-                postLogoutRedirectUri: $"{webClientRootUrl}",
-                //corsOrigins: new[] { webClientRootUrl.RemovePostFix("/") }
-                corsOrigins: new[] { "http://localhost:3000", "https://localhost:3000" }
+                redirectUri: $"{webClientRootUrl}",
+                corsOrigins: new[] { webClientRootUrl.RemovePostFix("/") }
             );
+
         }
 
 

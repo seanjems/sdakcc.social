@@ -57,6 +57,7 @@ namespace sdakcc.Web;
     )]
 public class sdakccWebModule : AbpModule
 {
+    private const string _defaultCorsPolicyName = "localhost";
     public override void PreConfigureServices(ServiceConfigurationContext context)
     {
         context.Services.PreConfigure<AbpMvcDataAnnotationsLocalizationOptions>(options =>
@@ -76,16 +77,11 @@ public class sdakccWebModule : AbpModule
     {
         var hostingEnvironment = context.Services.GetHostingEnvironment();
         var configuration = context.Services.GetConfiguration();
-        var _defaultCorsPolicyName = "localhost";
+        //var _defaultCorsPolicyName = "localhost";
 
 
 
-    ////quick fix
-    //context.Services.AddCors(c =>
-    //    {
-    //        c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod()
-    //        .AllowAnyHeader());
-    //    });
+    
 
         ConfigureUrls(configuration);
         ConfigureBundles();
@@ -96,8 +92,26 @@ public class sdakccWebModule : AbpModule
         ConfigureNavigationServices();
         ConfigureAutoApiControllers();
         ConfigureSwaggerServices(context.Services);
+        ConfigureCors(context, configuration);
     }
 
+    private void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
+    {
+        ////quick fix
+        context.Services.AddCors(options =>
+            {
+                options.AddPolicy(
+                    _defaultCorsPolicyName, 
+                       builder =>
+                         {
+                         builder
+                             .WithOrigins(configuration.GetSection("AllowedOrigins").Get<string[]>())
+                             .AllowAnyHeader()
+                             .AllowAnyMethod()
+                             .AllowCredentials();
+                        });
+            });
+    }
     private void ConfigureUrls(IConfiguration configuration)
     {
         Configure<AppUrlOptions>(options =>
@@ -227,10 +241,11 @@ public class sdakccWebModule : AbpModule
             app.UseErrorPage();
         }
 
-        app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+       
         app.UseCorrelationId();
         app.UseStaticFiles();
         app.UseRouting();
+        app.UseCors(_defaultCorsPolicyName);
         app.UseAuthentication();
         app.UseJwtTokenMiddleware();
 
