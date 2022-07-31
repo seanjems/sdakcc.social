@@ -1,5 +1,6 @@
 ﻿
 using Abp.Application.Services.Dto;
+using Abp.Authorization;
 using Abp.Domain.Entities;
 using Abp.UI;
 using Microsoft.AspNetCore.Hosting;
@@ -19,6 +20,7 @@ using Volo.Abp.Domain.Repositories;
 
 namespace sdakcc.Application.Posts
 {
+    [AbpAuthorize]
     public class PostsAppService: sdakccAppService
     {
         private readonly IRepository<Entities.Posts, Guid> _postsRepos;

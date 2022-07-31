@@ -38,6 +38,9 @@ using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.UI;
 using Volo.Abp.UI.Navigation;
 using Volo.Abp.VirtualFileSystem;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace sdakcc.Web;
 
@@ -79,10 +82,7 @@ public class sdakccWebModule : AbpModule
         var configuration = context.Services.GetConfiguration();
         //var _defaultCorsPolicyName = "localhost";
 
-
-
-    
-
+        ConfigureJwt(context, configuration);
         ConfigureUrls(configuration);
         ConfigureBundles();
         ConfigureAuthentication(context, configuration);
@@ -93,6 +93,27 @@ public class sdakccWebModule : AbpModule
         ConfigureAutoApiControllers();
         ConfigureSwaggerServices(context.Services);
         ConfigureCors(context, configuration);
+       
+    }
+
+    private void ConfigureJwt(ServiceConfigurationContext context, IConfiguration configuration)
+    {
+        context.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = configuration["Jwt:Issuer"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+                };
+            });
+        context.Services.AddMvc();
+        context.Services.AddControllers();
+        context.Services.AddRazorPages();
     }
 
     private void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
@@ -245,9 +266,15 @@ public class sdakccWebModule : AbpModule
         app.UseCorrelationId();
         app.UseStaticFiles();
         app.UseRouting();
+        
         app.UseCors(_defaultCorsPolicyName);
         app.UseAuthentication();
         app.UseJwtTokenMiddleware();
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+            endpoints.MapRazorPages();
+        });
 
         if (MultiTenancyConsts.IsEnabled)
         {
