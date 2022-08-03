@@ -38,6 +38,11 @@ using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.UI;
 using Volo.Abp.UI.Navigation;
 using Volo.Abp.VirtualFileSystem;
+using Volo.Abp.Identity;
+using sdakcc.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace sdakcc.Web;
 
@@ -93,6 +98,13 @@ public class sdakccWebModule : AbpModule
         ConfigureAutoApiControllers();
         ConfigureSwaggerServices(context.Services);
         ConfigureCors(context, configuration);
+        ConfigureIdentity(context, configuration);
+    }
+
+    private void ConfigureIdentity(ServiceConfigurationContext context, IConfiguration configuration)
+    {
+        context.Services.AddIdentity<AppUser, IdentityRole>()
+            .AddEntityFrameworkStores<sdakccDbContext>();
     }
 
     private void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
@@ -136,6 +148,29 @@ public class sdakccWebModule : AbpModule
 
     private void ConfigureAuthentication(ServiceConfigurationContext context, IConfiguration configuration)
     {
+        context.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+               .AddJwtBearer(o =>
+               {
+                   o.TokenValidationParameters = new TokenValidationParameters
+                   {
+
+                       ValidIssuer = jwtSetting.Issuer,
+                       ValidAudience = jwtSetting.Audience,
+                       IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.SecurityKey)),
+                        //ValidateIssuerSigningKey = true,
+                       ValidateIssuer = jwtSetting.IssuerAvailable, //will tip：：Bearer error="invalid_token", error_description="The issuer is invalid"
+                       ValidateAudience = jwtSetting.AudienceAvailable, //will tip：Bearer error="invalid_token", error_description="The audience is invalid"error_description="The audience is invalid"
+                   };
+
+                   o.SecurityTokenValidators.Clear();
+                   o.SecurityTokenValidators.Add(new sdakKccTokenValidator()); //add your Token Validator
+
+               });
+
         context.Services.AddAuthentication()
             .AddJwtBearer(options =>
             {
