@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Abp.Authorization.Users;
+using Abp.Domain.Entities.Auditing;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -10,7 +12,7 @@ using Volo.Abp.Users;
 namespace sdakcc.Entities
 {
     [NotMapped]
-    public class AppUser
+    public class AppUser : AbpUser<AppUser>
     {
 
         

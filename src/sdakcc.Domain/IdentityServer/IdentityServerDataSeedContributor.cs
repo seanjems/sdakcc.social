@@ -138,7 +138,7 @@ public class IdentityServerDataSeedContributor : IDataSeedContributor, ITransien
                 "phone",
                 "address",
                 "sdakcc"
-            };
+         };
 
         var configurationSection = _configuration.GetSection("IdentityServer:Clients");
 
@@ -177,7 +177,7 @@ public class IdentityServerDataSeedContributor : IDataSeedContributor, ITransien
                 secret: configurationSection["sdakcc_React:ClientSecret"]?.Sha256(),
                 requireClientSecret: false,
                 redirectUri: $"{webClientRootUrl}",
-                corsOrigins: new[] { webClientRootUrl.RemovePostFix("/") }
+                corsOrigins: configurationSection.GetSection("AllowedOrigins").Get<string[]>()
             );
 
         }
@@ -197,7 +197,7 @@ public class IdentityServerDataSeedContributor : IDataSeedContributor, ITransien
                 secret: configurationSection["sdakcc_Swagger:ClientSecret"]?.Sha256(),
                 requireClientSecret: false,
                 redirectUri: $"{swaggerRootUrl}/swagger/oauth2-redirect.html",
-                corsOrigins: new[] { swaggerRootUrl.RemovePostFix("/") }
+                corsOrigins: configurationSection.GetSection("AllowedOrigins").Get<string[]>()
             );
         }
     }

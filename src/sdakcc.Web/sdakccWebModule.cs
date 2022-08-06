@@ -43,6 +43,15 @@ using sdakcc.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
+using IdentityServer4.Stores;
+using Microsoft.Extensions.Logging;
+using Volo.Abp.AspNetCore.Mvc.AntiForgery;
+using Abp.Dependency;
+using Newtonsoft.Json.Serialization;
+using Newtonsoft.Json;
+using Abp.Json;
+using sdakcc.Application.AuthLogin;
 
 namespace sdakcc.Web;
 
@@ -59,10 +68,12 @@ namespace sdakcc.Web;
     typeof(AbpTenantManagementWebModule),
     typeof(AbpAspNetCoreSerilogModule),
     typeof(AbpSwashbuckleModule)
+    
     )]
 public class sdakccWebModule : AbpModule
 {
     private const string _defaultCorsPolicyName = "localhost";
+    
     public override void PreConfigureServices(ServiceConfigurationContext context)
     {
         context.Services.PreConfigure<AbpMvcDataAnnotationsLocalizationOptions>(options =>
@@ -76,6 +87,12 @@ public class sdakccWebModule : AbpModule
                 typeof(sdakccWebModule).Assembly
             );
         });
+        PreConfigure<IdentityBuilder>(identityBuilder =>
+        {
+            identityBuilder.AddSignInManager<LoginManager>();
+        });
+
+        
     }
 
     public override void ConfigureServices(ServiceConfigurationContext context)
@@ -93,23 +110,31 @@ public class sdakccWebModule : AbpModule
         ConfigureAuthentication(context, configuration);
         ConfigureAutoMapper();
         ConfigureVirtualFileSystem(hostingEnvironment);
-        ConfigureLocalizationServices();
+        ConfigureLocalizationServices();;
         ConfigureNavigationServices();
         ConfigureAutoApiControllers();
         ConfigureSwaggerServices(context.Services);
         ConfigureCors(context, configuration);
-        ConfigureIdentity(context, configuration);
+        //ConfigureIdentityServer(context, configuration);
+        //ConfigureMvc(context.Services);
+       
+
+
     }
 
-    private void ConfigureIdentity(ServiceConfigurationContext context, IConfiguration configuration)
-    {
-        context.Services.AddIdentity<AppUser, IdentityRole>()
-            .AddEntityFrameworkStores<sdakccDbContext>();
-    }
+    
+
+
+    //private void ConfigureIdentityServer(ServiceConfigurationContext context, IConfiguration configuration)
+    //{
+    //    context.Services.AddIdentityServer()
+    //    .AddDeveloperSigningCredential()
+    //    .AddDefaultEndpoints();
+    //}
 
     private void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
     {
-        ////quick fix
+       
         context.Services.AddCors(options =>
             {
                 options.AddPolicy(
@@ -158,12 +183,12 @@ public class sdakccWebModule : AbpModule
                    o.TokenValidationParameters = new TokenValidationParameters
                    {
 
-                       ValidIssuer = jwtSetting.Issuer,
-                       ValidAudience = jwtSetting.Audience,
-                       IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.SecurityKey)),
-                        //ValidateIssuerSigningKey = true,
-                       ValidateIssuer = jwtSetting.IssuerAvailable, //will tip：：Bearer error="invalid_token", error_description="The issuer is invalid"
-                       ValidateAudience = jwtSetting.AudienceAvailable, //will tip：Bearer error="invalid_token", error_description="The audience is invalid"error_description="The audience is invalid"
+                       ValidIssuer = configuration["Jwt:Issuer"], // jwtSetting.Issuer,
+                       ValidAudience = configuration["Jwt:Audience"], // jwtSetting.Audience,
+                       IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])),
+                       //ValidateIssuerSigningKey = true,
+                       //ValidateIssuer = jwtSetting.IssuerAvailable, //will tip：：Bearer error="invalid_token", error_description="The issuer is invalid"
+                       //ValidateAudience = jwtSetting.AudienceAvailable, //will tip：Bearer error="invalid_token", error_description="The audience is invalid"error_description="The audience is invalid"
                    };
 
                    o.SecurityTokenValidators.Clear();
@@ -171,15 +196,15 @@ public class sdakccWebModule : AbpModule
 
                });
 
-        context.Services.AddAuthentication()
-            .AddJwtBearer(options =>
-            {
-                options.Authority = configuration["AuthServer:Authority"];
-                options.RequireHttpsMetadata = Convert.ToBoolean(configuration["AuthServer:RequireHttpsMetadata"]);
-                options.Audience = "sdakcc";
-            });
+        //context.Services.AddAuthentication()
+        //    .AddJwtBearer(options =>
+        //    {
+        //        options.Authority = configuration["AuthServer:Authority"];
+        //        options.RequireHttpsMetadata = Convert.ToBoolean(configuration["AuthServer:RequireHttpsMetadata"]);
+        //        options.Audience = "sdakcc";
+        //    });
 
-        context.Services.ForwardIdentityAuthenticationForBearer();
+        //context.Services.ForwardIdentityAuthenticationForBearer();
     }
 
     private void ConfigureAutoMapper()
@@ -270,6 +295,7 @@ public class sdakccWebModule : AbpModule
         }
 
         app.UseAbpRequestLocalization();
+    
 
         if (!env.IsDevelopment())
         {
@@ -279,18 +305,18 @@ public class sdakccWebModule : AbpModule
        
         app.UseCorrelationId();
         app.UseStaticFiles();
+        app.UseIdentityServer();
         app.UseRouting();
         app.UseCors(_defaultCorsPolicyName);
-        app.UseAuthentication();
+        //app.UseAuthentication();
         app.UseJwtTokenMiddleware();
-
+      
         if (MultiTenancyConsts.IsEnabled)
         {
             app.UseMultiTenancy();
         }
 
         app.UseUnitOfWork();
-        app.UseIdentityServer();
         app.UseAuthorization();
         app.UseSwagger();
         app.UseAbpSwaggerUI(options =>
@@ -299,6 +325,10 @@ public class sdakccWebModule : AbpModule
         });
         app.UseAuditing();
         app.UseAbpSerilogEnrichers();
-        app.UseConfiguredEndpoints();
+        app.UseConfiguredEndpoints(endpoints=>
+        {
+            endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+            endpoints.MapControllerRoute("deafultWithArea", "{area}/{controller=Home}/{action=Index}");
+        });
     }
 }
