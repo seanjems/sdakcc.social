@@ -4,6 +4,7 @@ using sdakcc.LikeseDto;
 using sdakcc.PostsDto;
 using System.Collections.Generic;
 using System.Linq;
+using Volo.Abp.Identity;
 
 namespace sdakcc;
 
@@ -21,6 +22,6 @@ public class sdakccApplicationAutoMapperProfile : Profile
         CreateMap<Entities.Posts, PostsListDto>();
         CreateMap<CreateLikeDto, Entities.Like > ();
         CreateMap<IQueryable<Entities.Posts>, IEnumerable<PostsListDto>>();
-
+        CreateMap<IdentityUser, UsersDto.UserClaimsDto>();
     }
 }

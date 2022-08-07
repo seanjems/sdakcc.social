@@ -23,6 +23,11 @@ using Abp.Domain.Repositories;
 using Abp.Authorization.Users;
 using Volo.Abp.Identity;
 using IdentityUser = Volo.Abp.Identity.IdentityUser;
+using Newtonsoft.Json;
+using System.Web.Http.Controllers;
+using System.Net.Http;
+using System.Net;
+using System.Web.Http.Filters;
 
 namespace sdakcc.Web.Controllers
 {
@@ -34,7 +39,7 @@ namespace sdakcc.Web.Controllers
         private readonly ISigningCredentialStore _signingCredentialStore;
         private readonly IConfiguration _configuration;
 
-        
+
         public AuthorizationController(IdentityUserManager userManager, LoginManager loginManager, ISigningCredentialStore signingCredentialStore, IConfiguration configuration)
         {
             _userManager = userManager;
@@ -43,24 +48,36 @@ namespace sdakcc.Web.Controllers
             _loginManager = loginManager;
         }
 
-        [HttpPost]
-        public async Task<ActionResult<UserLoginResultDto>> CustomLogin(UserLoginDto credentials)
+        
+
+            [HttpPost]
+        public async Task<ActionResult<UserLoginResultDto>> CustomLogin([FromBody]UserLoginDto credentials)
         {
 
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            
             var user = await GetCustomValidatedUserAsync(credentials);
             if (user == null) return NotFound("Invalid Userame and or password");
 
             var signingCredentials = await _signingCredentialStore.GetSigningCredentialsAsync();
             var tokenHandler = new JwtSecurityTokenHandler();
 
-
-
             var ValidIssuer = _configuration["Jwt:Issuer"]; // jwtSetting.Issuer,
             var ValidAudience = _configuration["Jwt:Audience"]; // jwtSetting.Audience,
 
+            var userOutput = new UserClaimsDto()
+            {
+                Email = user.Email,
+                FirstName = user.Name,
+                LastName = user.Surname,
+                FullName = $"{user.Name} {user.Surname}",
+                TenantId = user.TenantId,
+                UserId = user.Id,
+            };
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[] { new Claim("user", user.ToString()) /* extra custom claims */ }),
+                Subject = new ClaimsIdentity(new[] { new Claim("user", JsonConvert.SerializeObject(userOutput).ToString()) /* extra custom claims */ }),
                 Issuer = ValidIssuer,
                 IssuedAt = DateTime.UtcNow,
                 Audience = ValidAudience,
@@ -78,13 +95,16 @@ namespace sdakcc.Web.Controllers
 
         private async Task<IdentityUser> GetCustomValidatedUserAsync(UserLoginDto credentials)
         {
-            
-            var loginResult = await _loginManager.PasswordSignInAsync(credentials.Email, credentials.PassWord, credentials.RememberMe, false);
-
-            if (loginResult.Succeeded)
+            var user = await _userManager.FindByEmailAsync(credentials.userNameOrEmailAddress);
+            if (user != null)
             {
-                var user = await _userManager.FindByEmailAsync(credentials.Email);
-                return user;
+
+                var loginResult = await _loginManager.PasswordSignInAsync(user, credentials.Password, credentials.RememberMe,false);
+
+                if (loginResult.Succeeded)
+                {
+                    return user;
+                }
             }
             return null;
         }
