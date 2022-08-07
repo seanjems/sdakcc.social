@@ -52,6 +52,7 @@ using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using Abp.Json;
 using sdakcc.Application.AuthLogin;
+using sdakcc.Repositories;
 
 namespace sdakcc.Web;
 
@@ -89,10 +90,14 @@ public class sdakccWebModule : AbpModule
         });
         PreConfigure<IdentityBuilder>(identityBuilder =>
         {
-            identityBuilder.AddSignInManager<LoginManager>();
+            identityBuilder.AddSignInManager<LoginManager>().AddUserManager<UserManager>();
         });
 
-        
+        //PreConfigure<AbpIdentityBuilder>(identityBuilder =>
+        //{
+        //    identityBuilder.AddAbpUserManager<UserManager>();
+        //});
+
     }
 
     public override void ConfigureServices(ServiceConfigurationContext context)
@@ -101,35 +106,29 @@ public class sdakccWebModule : AbpModule
         var configuration = context.Services.GetConfiguration();
         //var _defaultCorsPolicyName = "localhost";
 
-
-
-    
-
         ConfigureUrls(configuration);
         ConfigureBundles();
         ConfigureAuthentication(context, configuration);
+        //ConfigureIdentity(context.Services);
         ConfigureAutoMapper();
         ConfigureVirtualFileSystem(hostingEnvironment);
-        ConfigureLocalizationServices();;
+        ConfigureLocalizationServices();
         ConfigureNavigationServices();
         ConfigureAutoApiControllers();
         ConfigureSwaggerServices(context.Services);
         ConfigureCors(context, configuration);
-        //ConfigureIdentityServer(context, configuration);
+        //ConfigureUserManager(context.Services);
         //ConfigureMvc(context.Services);
-       
-
-
     }
 
-    
-
-
-    //private void ConfigureIdentityServer(ServiceConfigurationContext context, IConfiguration configuration)
+    //private void ConfigureIdentity(IServiceCollection services)
     //{
-    //    context.Services.AddIdentityServer()
-    //    .AddDeveloperSigningCredential()
-    //    .AddDefaultEndpoints();
+    //    services.AddIdentity<AppUser, Role>().AddRoleManager<RoleManager>();
+    //}
+
+    //private void ConfigureUserManager(IServiceCollection services)
+    //{
+    //    services.AddScoped<UserManager<AppUser>, UserManager>();
     //}
 
     private void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
@@ -274,14 +273,16 @@ public class sdakccWebModule : AbpModule
 
     private void ConfigureSwaggerServices(IServiceCollection services)
     {
+
         services.AddAbpSwaggerGen(
-            options =>
-            {
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "sdakcc API", Version = "v1" });
-                options.DocInclusionPredicate((docName, description) => true);
-                options.CustomSchemaIds(type => type.FullName);
-            }
-        );
+        options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo { Title = "sdakcc API", Version = "v1" });
+            options.DocInclusionPredicate((docName, description) => true);
+            options.CustomSchemaIds(type => type.FullName);
+        });
+
+
     }
 
     public override void OnApplicationInitialization(ApplicationInitializationContext context)
@@ -300,9 +301,7 @@ public class sdakccWebModule : AbpModule
         if (!env.IsDevelopment())
         {
             app.UseErrorPage();
-        }
-
-       
+        }    
         app.UseCorrelationId();
         app.UseStaticFiles();
         app.UseIdentityServer();

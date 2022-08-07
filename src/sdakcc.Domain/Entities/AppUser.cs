@@ -1,12 +1,12 @@
 ﻿using Abp.Authorization.Users;
 using Abp.Domain.Entities.Auditing;
-using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Volo.Abp.Identity;
 using Volo.Abp.Users;
 
 namespace sdakcc.Entities

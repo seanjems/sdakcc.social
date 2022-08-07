@@ -1,7 +1,6 @@
 ﻿using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -18,7 +17,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.AspNetCore.Mvc;
 using static Volo.Abp.Identity.IdentityPermissions;
-using sdakcc.Application.AuthLogin;
 using Abp.Domain.Repositories;
 using Abp.Authorization.Users;
 using Volo.Abp.Identity;
@@ -28,21 +26,25 @@ using System.Web.Http.Controllers;
 using System.Net.Http;
 using System.Net;
 using System.Web.Http.Filters;
+using sdakcc.Repositories;
 
 namespace sdakcc.Web.Controllers
 {
     [Route("api/[controller]/[action]")]
     public class AuthorizationController : Controller
     {
-        private readonly IdentityUserManager _userManager;
-        private readonly LoginManager _loginManager;
+       // private readonly IdentityUserManager _userManager;
+        private readonly UserManager _userManager;
+       private readonly LogInManager _loginManager;
         private readonly ISigningCredentialStore _signingCredentialStore;
         private readonly IConfiguration _configuration;
 
 
-        public AuthorizationController(IdentityUserManager userManager, LoginManager loginManager, ISigningCredentialStore signingCredentialStore, IConfiguration configuration)
+        public AuthorizationController( UserManager userManager, LogInManager loginManager, ISigningCredentialStore signingCredentialStore, IConfiguration configuration)
         {
             _userManager = userManager;
+           // _userManager2 = userManager2;
+            //this.userManager1 = userManager1; 
             _signingCredentialStore = signingCredentialStore ?? throw new ArgumentNullException(nameof(signingCredentialStore));
             _configuration = configuration;
             _loginManager = loginManager;
@@ -67,7 +69,7 @@ namespace sdakcc.Web.Controllers
 
             var userOutput = new UserClaimsDto()
             {
-                Email = user.Email,
+                Email = user.EmailAddress,
                 FirstName = user.Name,
                 LastName = user.Surname,
                 FullName = $"{user.Name} {user.Surname}",
@@ -93,20 +95,43 @@ namespace sdakcc.Web.Controllers
 
         }
 
-        private async Task<IdentityUser> GetCustomValidatedUserAsync(UserLoginDto credentials)
+      
+        private async Task<AppUser> GetCustomValidatedUserAsync(UserLoginDto credentials)
         {
             var user = await _userManager.FindByEmailAsync(credentials.userNameOrEmailAddress);
             if (user != null)
             {
 
-                var loginResult = await _loginManager.PasswordSignInAsync(user, credentials.Password, credentials.RememberMe,false);
+                var loginResult = await _loginManager.LoginAsync(credentials.userNameOrEmailAddress, credentials.Password,null, false);
 
-                if (loginResult.Succeeded)
-                {
-                    return user;
-                }
+                return loginResult.User;
             }
             return null;
+        }
+        [HttpPost]
+        public async Task<IActionResult> RegisterUserAsync([FromBody]CreateUserDto credentials)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var user = await _userManager.FindByEmailAsync(credentials.EmailAddress);
+
+            if (user != null) return BadRequest("User already exists");
+            var newUser = new AppUser()
+            {
+                Name = credentials.Name,
+                EmailAddress = credentials.EmailAddress,
+                UserName = credentials.UserName,
+                Surname = credentials.Surname
+
+            };
+
+           var result = await _userManager.CreateAsync(newUser, credentials.Password);
+         
+            if (result.Succeeded) 
+            {
+                return CreatedAtRoute(null, newUser);
+            }
+            
+            return BadRequest(result.Errors);
         }
     }
 }
