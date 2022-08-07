@@ -14,18 +14,17 @@ namespace sdakcc.Entities
     [NotMapped]
     public class AppUser : AbpUser<AppUser>
     {
-
         
-        public int Relationship { get; protected set; }
-        public string Address { get; protected set; }
-        public int Family { get; protected set; }
-        public int Profession { get; protected set; }
-        public string Aboutme { get; protected set; }
-        public int LocalChurch { get; protected set; }
-        public string Contacts { get; protected set; }
-        public string FavouriteVerse { get; protected set; }
+        public int Relationship { get;  set; }
+        public string Address { get;  set; }
+        public int Family { get;  set; }
+        public int Profession { get;  set; }
+        public string Aboutme { get;  set; }
+        public int LocalChurch { get;  set; }
+        public string Contacts { get;  set; }
+        public string FavouriteVerse { get;  set; }
 
-        public List<Follower> Followers { get; protected set; }
+        public List<Follower> Followers { get;  set; }
 
 
     }

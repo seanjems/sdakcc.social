@@ -35,12 +35,12 @@ namespace sdakcc.Web.Controllers
     {
        // private readonly IdentityUserManager _userManager;
         private readonly UserManager _userManager;
-       private readonly LogInManager _loginManager;
+       private readonly LoginManager _loginManager;
         private readonly ISigningCredentialStore _signingCredentialStore;
         private readonly IConfiguration _configuration;
 
 
-        public AuthorizationController( UserManager userManager, LogInManager loginManager, ISigningCredentialStore signingCredentialStore, IConfiguration configuration)
+        public AuthorizationController( UserManager userManager, LoginManager loginManager, ISigningCredentialStore signingCredentialStore, IConfiguration configuration)
         {
             _userManager = userManager;
            // _userManager2 = userManager2;
@@ -96,15 +96,18 @@ namespace sdakcc.Web.Controllers
         }
 
       
-        private async Task<AppUser> GetCustomValidatedUserAsync(UserLoginDto credentials)
+        private async Task<IdentityUser> GetCustomValidatedUserAsync(UserLoginDto credentials)
         {
             var user = await _userManager.FindByEmailAsync(credentials.userNameOrEmailAddress);
             if (user != null)
             {
 
-                var loginResult = await _loginManager.LoginAsync(credentials.userNameOrEmailAddress, credentials.Password,null, false);
+                var loginResult = await _loginManager.PasswordSignInAsync(user, credentials.Password,credentials.RememberMe, false);
 
-                return loginResult.User;
+                if (loginResult.Succeeded)
+                {
+                    return user;
+                }
             }
             return null;
         }
@@ -117,11 +120,12 @@ namespace sdakcc.Web.Controllers
             if (user != null) return BadRequest("User already exists");
             var newUser = new AppUser()
             {
-                Name = credentials.Name,
-                EmailAddress = credentials.EmailAddress,
+                
+                Email = credentials.EmailAddress,
                 UserName = credentials.UserName,
-                Surname = credentials.Surname
-
+                Surname = credentials.Surname,
+                
+                
             };
 
            var result = await _userManager.CreateAsync(newUser, credentials.Password);
