@@ -88,9 +88,9 @@ public class sdakccWebModule : AbpModule
                 typeof(sdakccWebModule).Assembly
             );
         });
-        PreConfigure<IdentityBuilder>(identityBuilder =>
+        PreConfigure<AbpIdentityBuilder>(identityBuilder =>
         {
-            identityBuilder.AddSignInManager<LoginManager>().AddUserManager<UserManager>();
+            identityBuilder.AddSignInManager<LogInManager>().AddUserManager<UserManager>();
         });
 
         //PreConfigure<AbpIdentityBuilder>(identityBuilder =>

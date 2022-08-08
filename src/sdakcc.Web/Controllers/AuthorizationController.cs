@@ -35,16 +35,14 @@ namespace sdakcc.Web.Controllers
     {
        // private readonly IdentityUserManager _userManager;
         private readonly UserManager _userManager;
-       private readonly LoginManager _loginManager;
+       private readonly LogInManager _loginManager;
         private readonly ISigningCredentialStore _signingCredentialStore;
         private readonly IConfiguration _configuration;
 
 
-        public AuthorizationController( UserManager userManager, LoginManager loginManager, ISigningCredentialStore signingCredentialStore, IConfiguration configuration)
+        public AuthorizationController( UserManager userManager, LogInManager loginManager, ISigningCredentialStore signingCredentialStore, IConfiguration configuration)
         {
-            _userManager = userManager;
-           // _userManager2 = userManager2;
-            //this.userManager1 = userManager1; 
+            _userManager = userManager; 
             _signingCredentialStore = signingCredentialStore ?? throw new ArgumentNullException(nameof(signingCredentialStore));
             _configuration = configuration;
             _loginManager = loginManager;
@@ -96,15 +94,15 @@ namespace sdakcc.Web.Controllers
         }
 
       
-        private async Task<IdentityUser> GetCustomValidatedUserAsync(UserLoginDto credentials)
+        private async Task<AppUser> GetCustomValidatedUserAsync(UserLoginDto credentials)
         {
             var user = await _userManager.FindByEmailAsync(credentials.userNameOrEmailAddress);
             if (user != null)
             {
 
-                var loginResult = await _loginManager.PasswordSignInAsync(user, credentials.Password,credentials.RememberMe, false);
+                var loginResult = await _loginManager.LoginAsync(credentials.userNameOrEmailAddress, credentials.Password,null, false);
 
-                if (loginResult.Succeeded)
+                if (loginResult.User !=null)
                 {
                     return user;
                 }
@@ -121,10 +119,10 @@ namespace sdakcc.Web.Controllers
             var newUser = new AppUser()
             {
                 
-                Email = credentials.EmailAddress,
+                EmailAddress = credentials.EmailAddress,
                 UserName = credentials.UserName,
                 Surname = credentials.Surname,
-                
+                Name = credentials.Name,                
                 
             };
 
