@@ -18,7 +18,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.AspNetCore.Mvc;
 using static Volo.Abp.Identity.IdentityPermissions;
-using sdakcc.Application.AuthLogin;
+//using sdakcc.Application.AuthLogin;
 using Abp.Domain.Repositories;
 using Abp.Authorization.Users;
 using Volo.Abp.Identity;
@@ -34,13 +34,13 @@ namespace sdakcc.Web.Controllers
     [Route("api/[controller]/[action]")]
     public class AuthorizationController : Controller
     {
-        private readonly IdentityUserManager _userManager;
-        private readonly LoginManager _loginManager;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _loginManager;
         private readonly ISigningCredentialStore _signingCredentialStore;
         private readonly IConfiguration _configuration;
 
 
-        public AuthorizationController(IdentityUserManager userManager, LoginManager loginManager, ISigningCredentialStore signingCredentialStore, IConfiguration configuration)
+        public AuthorizationController(UserManager<AppUser> userManager, SignInManager<AppUser> loginManager, ISigningCredentialStore signingCredentialStore, IConfiguration configuration)
         {
             _userManager = userManager;
             _signingCredentialStore = signingCredentialStore ?? throw new ArgumentNullException(nameof(signingCredentialStore));
@@ -68,10 +68,9 @@ namespace sdakcc.Web.Controllers
             var userOutput = new UserClaimsDto()
             {
                 Email = user.Email,
-                FirstName = user.Name,
-                LastName = user.Surname,
-                FullName = $"{user.Name} {user.Surname}",
-                TenantId = user.TenantId,
+                //FirstName = user.NormalizedUserName,
+                //LastName = user.Surname,
+                FullName = user.NormalizedUserName,
                 UserId = user.Id,
             };
 
@@ -93,7 +92,7 @@ namespace sdakcc.Web.Controllers
 
         }
 
-        private async Task<IdentityUser> GetCustomValidatedUserAsync(UserLoginDto credentials)
+        private async Task<AppUser> GetCustomValidatedUserAsync(UserLoginDto credentials)
         {
             var user = await _userManager.FindByEmailAsync(credentials.userNameOrEmailAddress);
             if (user != null)
@@ -107,6 +106,33 @@ namespace sdakcc.Web.Controllers
                 }
             }
             return null;
+        }
+
+        //add user
+        [HttpPost]
+        public async Task<IActionResult> RegisterUserAsync([FromBody] CreateUserDto credentials)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var user = await _userManager.FindByEmailAsync(credentials.EmailAddress);
+
+            if (user != null) return BadRequest("User already exists");
+
+            var newUser = new AppUser()
+            {
+                Email = credentials.EmailAddress,
+                UserName = credentials.UserName,
+                NormalizedUserName = $"{credentials.Name} {credentials.Surname}"
+               
+            };
+
+            var result = await _userManager.CreateAsync(newUser, credentials.Password);
+
+            if (result.Succeeded)
+            {
+                return CreatedAtRoute(null, newUser);
+            }
+
+            return BadRequest(result.Errors);
         }
     }
 }

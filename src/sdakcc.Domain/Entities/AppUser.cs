@@ -12,10 +12,11 @@ using Volo.Abp.Users;
 namespace sdakcc.Entities
 {
     [NotMapped]
-    public class AppUser : AbpUser<AppUser>
+    public class AppUser :IdentityUser
     {
 
         
+
         public int Relationship { get; protected set; }
         public string Address { get; protected set; }
         public int Family { get; protected set; }

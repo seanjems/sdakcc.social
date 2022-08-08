@@ -52,6 +52,7 @@ using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using Abp.Json;
 using sdakcc.Application.AuthLogin;
+using IdentityUser = Microsoft.AspNetCore.Identity.IdentityUser;
 
 namespace sdakcc.Web;
 
@@ -87,12 +88,12 @@ public class sdakccWebModule : AbpModule
                 typeof(sdakccWebModule).Assembly
             );
         });
-        PreConfigure<IdentityBuilder>(identityBuilder =>
-        {
-            identityBuilder.AddSignInManager<LoginManager>();
-        });
+        //PreConfigure<IdentityBuilder>(identityBuilder =>
+        //{
+        //    identityBuilder.AddSignInManager<LoginManager>();
+        //});
 
-        
+
     }
 
     public override void ConfigureServices(ServiceConfigurationContext context)
@@ -115,14 +116,40 @@ public class sdakccWebModule : AbpModule
         ConfigureAutoApiControllers();
         ConfigureSwaggerServices(context.Services);
         ConfigureCors(context, configuration);
-        //ConfigureIdentityServer(context, configuration);
+        ConfigureIdentityServer(context.Services);
         //ConfigureMvc(context.Services);
        
 
 
     }
 
-    
+    private void ConfigureIdentityServer(IServiceCollection services)
+    {
+        services.AddIdentity<AppUser, Role>(options => options.SignIn.RequireConfirmedAccount = false);
+      
+        services.Configure<IdentityOptions>(options =>
+        {
+            // Password settings.
+            options.Password.RequireDigit = false;
+            options.Password.RequireLowercase = false;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequireUppercase = false;
+            options.Password.RequiredLength = 6;
+            options.Password.RequiredUniqueChars = 0;
+
+            // Lockout settings.
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(3600);
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.AllowedForNewUsers = false;
+
+            // User settings.
+            options.User.AllowedUserNameCharacters =
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+            options.User.RequireUniqueEmail = true;
+        });
+    }
+
+
 
 
     //private void ConfigureIdentityServer(ServiceConfigurationContext context, IConfiguration configuration)
@@ -305,7 +332,7 @@ public class sdakccWebModule : AbpModule
        
         app.UseCorrelationId();
         app.UseStaticFiles();
-        app.UseIdentityServer();
+       // app.UseIdentityServer();
         app.UseRouting();
         app.UseCors(_defaultCorsPolicyName);
         //app.UseAuthentication();
